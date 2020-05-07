@@ -79,7 +79,7 @@ smtpd_helo_required = yes
 strict_rfc821_envelopes = yes
 unknown_address_reject_code = 554
 
-{% if postfix_relayhost %}
+{% if postfix_relayhost is defined %}
 relayhost = {{ postfix_relayhost }}
 {% if postfix_sasl_auth_enable %}
 smtp_sasl_auth_enable = {{ postfix_sasl_auth_enable | bool | ternary('yes', 'no') }}
