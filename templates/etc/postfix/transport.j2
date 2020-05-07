@@ -1,0 +1,10 @@
+#support.sol1.net        smtp:[10.1.13.21]
+
+{% if postfix_transports is defined %}
+
+{% for transport in postfix_transports %}
+{{ transport }}
+
+{% endfor %}
+
+{% endif %}
