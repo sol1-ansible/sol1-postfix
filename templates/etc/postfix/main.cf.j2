@@ -28,7 +28,7 @@ smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 # See /usr/share/doc/postfix/TLS_README.gz in the postfix-doc package for
 # information on enabling SSL in the smtp client.
 
-smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination reject_non_fqdn_sender reject_unknown_sender_domain reject_unknown_recipient_domain reject_unauth_destination reject_unauth_pipelining reject_invalid_hostname permit
+smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination reject_non_fqdn_sender reject_unknown_recipient_domain reject_unauth_destination reject_unauth_pipelining reject_invalid_hostname permit
 
 myhostname = {{ postfix_hostname }}
 mydomain = {{ postfix_hostname }}
@@ -66,7 +66,7 @@ relay_domains = {{ postfix_relaydomains }}
 
 smtpd_recipient_restrictions = 
 	reject_non_fqdn_sender
-        reject_unknown_sender_domain
+#        reject_unknown_sender_domain
         reject_unknown_recipient_domain
         permit_mynetworks
         reject_unauth_destination
@@ -79,7 +79,7 @@ smtpd_helo_required = yes
 strict_rfc821_envelopes = yes
 unknown_address_reject_code = 554
 
-{% if postfix_relayhost is defined %}
+{% if postfix_relayhost %}
 relayhost = {{ postfix_relayhost }}
 {% if postfix_sasl_auth_enable %}
 smtp_sasl_auth_enable = {{ postfix_sasl_auth_enable | bool | ternary('yes', 'no') }}
