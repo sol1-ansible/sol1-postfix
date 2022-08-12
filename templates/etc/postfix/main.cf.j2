@@ -50,7 +50,7 @@ sender_canonical_maps = hash:/etc/postfix/sender_canonical_maps
 smtp_generic_maps = hash:/etc/postfix/generic
 {% endif %}
 mydestination = {{ postfix_mydestination }}
-mynetworks = {{ postfix_mynetworks join(' ') }}
+mynetworks = {{ postfix_mynetworks |join(' ') }}
 mailbox_size_limit = 0
 recipient_delimiter = +
 inet_interfaces = {{ postfix_inet_interfaces }}
@@ -64,7 +64,7 @@ transport_maps = hash:/etc/postfix/transport
 relay_domains = {{ postfix_relaydomains }}
 {% endif %}
 
-smtpd_recipient_restrictions = 
+smtpd_recipient_restrictions =
 	reject_non_fqdn_sender
 #        reject_unknown_sender_domain
         reject_unknown_recipient_domain
