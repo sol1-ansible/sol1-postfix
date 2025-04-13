@@ -1,161 +1,115 @@
-# tasks file for postfix
 ---
-- name: facts | set
-  set_fact:
+- name: Set facts if docker container
+  ansible.builtin.set_fact:
      is_docker_guest: "{{ ansible_virtualization_role | default('host') == 'guest' and ansible_virtualization_type | default('none') == 'docker' }}"
-  tags:
-    - configuration
-    - postfix
-    - postfix-facts
 
-- name: configure debconf
-  debconf:
+- name: Configure postfix_debconf_selections
+  ansible.builtin.debconf:
     name: "{{ item.name }}"
     question: "{{ item.question }}"
     value: "{{ item.value }}"
     vtype: "{{ item.vtype }}"
   with_items: "{{ postfix_debconf_selections }}"
-  tags:
-    - configuration
-    - postfix
-    - postfix-install
 
-- name: install package
-  apt:
+- name: Install postfix packages
+  ansible.builtin.apt:
     name: "{{ item }}"
     state: "{{ apt_install_state | default('latest') }}"
     update_cache: true
     cache_valid_time: "{{ apt_update_cache_valid_time | default(3600) }}"
   with_items: "{{ postfix_install }}"
-  tags:
-    - configuration
-    - postfix
-    - postfix-install
 
-- name: configure mailname
-  template:
-    src: etc/mailname.j2
-    dest: /etc/mailname
-    owner: root
-    group: root
-    mode: 0644
-  notify: restart postfix
-  tags:
-    - configuration
-    - postfix
-    - postfix-mailname
+- name: Configure Postfix standard templates
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ postfix_user }}"
+    group: "{{ postfix_group }}"
+    mode: "{{ item.mode }}"
+  loop: "{{ postfix_standard_templates }}"
+  notify:
+    - Postmap {{ item.postmap | default('') }}"
+    - Restart postfix
 
-- name: update configuration file
-  template:
-    src: etc/postfix/main.cf.j2
-    dest: /etc/postfix/main.cf
-    owner: root
-    group: root
-    mode: 0644
-  notify: restart postfix
-  tags:
-    - configuration
-    - postfix
-    - postfix-configuration
-
-- name: update transport maps
-  template:
-   src: etc/postfix/transport.j2
-   dest: /etc/postfix/transport
-   owner: root
-   group: root
-   mode: 0644
-  notify: postmap transport
-  tags:
-    - configuration
-
-- name: configure sasl username/password
-  template:
-    src: etc/postfix/sasl_passwd.j2
-    dest: /etc/postfix/sasl_passwd
-    owner: root
-    group: root
+- name: Configure sasl username/password when defined
+  ansible.builtin.template:
+    src: sasl_passwd.j2
+    dest: "{{ postfix_conf_dir }}/sasl_passwd"
+    owner: "{{ postfix_user }}"
+    group: "{{ postfix_group }}"
     mode: 0600
-  when: postfix_relayhost != false
+  when: postfix_sasl_auth_enabled | bool
   no_log: true
   notify:
-    - postmap sasl_passwd
-    - restart postfix
-  tags:
-    - configuration
-    - postfix
-    - postfix-sasl-passwd
+    - Postmap sasl_passwd
+    - Restart postfix
 
-- name: configure aliases
-  lineinfile:
-    dest: /etc/aliases
+- name: Configure aliases
+  ansible.builtin.lineinfile:
+    dest: "{{ postfix_conf_dir }}/virtual"
     regexp: '^{{ item.user }}:.*'
     line: '{{ item.user }}: {{ item.alias }}'
-    owner: root
-    group: root
+    owner: "{{ postfix_user }}"
+    group: "{{ postfix_group }}"
     mode: 0644
     create: true
     state: present
   with_items: "{{ postfix_aliases }}"
+  when: postfix_aliases is defined and postfix_aliases | length > 0
   notify:
-    - new aliases
-    - restart postfix
-  tags:
-    - configuration
-    - postfix
-    - postfix-aliases
+    - New aliases
+    - Restart postfix
 
-- name: configure virtual aliases
-  lineinfile:
-    dest: /etc/postfix/virtual
+- name: Configure virtual aliases
+  ansible.builtin.lineinfile:
+    dest: "{{ postfix_conf_dir }}/virtual"
     regexp: '^{{ item.virtual }}.*'
     line: '{{ item.virtual }} {{ item.alias }}'
-    owner: root
-    group: root
+    owner: "{{ postfix_user }}"
+    group: "{{ postfix_group }}"
     mode: 0644
     create: true
     state: present
   with_items: "{{ postfix_virtual_aliases }}"
+  when: postfix_virtual_aliases is defined and postfix_virtual_aliases | length > 0
   notify:
-    - new virtual aliases
-    - restart postfix
-  tags:
-    - configuration
-    - postfix
-    - postfix-virtual-aliases
+    - New virtual aliases
+    - Restart postfix
 
-- name: configure sender canonical maps
-  lineinfile:
-    dest: /etc/postfix/sender_canonical_maps
+- name: Configure sender canonical maps
+  ansible.builtin.lineinfile:
+    dest: "{{ postfix_conf_dir }}/sender_canonical_maps"
     regexp: '^{{ item.sender }}.*'
     line: '{{ item.sender }} {{ item.rewrite }}'
-    owner: root
-    group: root
+    owner: "{{ postfix_user }}"
+    group: "{{ postfix_group }}"
     mode: 0644
     create: true
     state: present
   with_items: "{{ postfix_sender_canonical_maps }}"
+  when: postfix_sender_canonical_maps is defined and postfix_sender_canonical_maps | length > 0
   notify:
-    - postmap sender_canonical_maps
-    - restart postfix
+    - Postmap sender_canonical_maps
+    - Restart postfix
 
-- name: configure generic table
-  lineinfile:
-    dest: /etc/postfix/generic
+- name: Configure generic table
+  ansible.builtin.lineinfile:
+    dest: "{{ postfix_conf_dir }}/generic"
     regexp: '^{{ item.pattern }}.*'
     line: '{{ item.pattern }} {{ item.result }}'
-    owner: root
-    group: root
+    owner: "{{ postfix_user }}"
+    group: "{{ postfix_group }}"
     mode: 0644
     create: true
     state: present
   with_items: "{{ postfix_generic }}"
+  when: postfix_generic is defined and postfix_generic | length > 0
   notify:
-    - postmap generic
-    - restart postfix
+    - Postmap generic
+    - Restart postfix
 
 - name: start and enable service
-  service:
+  ansible.builtin.service:
     name: postfix
     state: "{{ service_default_state | default('started') }}"
     enabled: "{{ service_default_enabled | default(true) | bool }}"

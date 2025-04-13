@@ -18,6 +18,7 @@ append_dot_mydomain = no
 
 readme_directory = no
 
+
 # TLS parameters
 smtpd_tls_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
 smtpd_tls_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
@@ -25,8 +26,7 @@ smtpd_use_tls=yes
 smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
-# See /usr/share/doc/postfix/TLS_README.gz in the postfix-doc package for
-# information on enabling SSL in the smtp client.
+
 
 smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination reject_non_fqdn_sender reject_unknown_recipient_domain reject_unauth_destination reject_unauth_pipelining reject_invalid_hostname permit
 
@@ -80,7 +80,8 @@ strict_rfc821_envelopes = yes
 unknown_address_reject_code = 554
 
 {% if postfix_relayhost %}
-relayhost = {{ postfix_relayhost }}
+{% if postfix_relayhost_port %}
+relayhost = {{ postfix_relayhost }}:{{ postfix_relayhost_port }}
 {% if postfix_sasl_auth_enable %}
 smtp_sasl_auth_enable = {{ postfix_sasl_auth_enable | bool | ternary('yes', 'no') }}
 smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd

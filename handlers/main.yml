@@ -1,37 +1,37 @@
 # handlers file for postfix
 ---
-- name: restart postfix
-  command: /bin/true
+- name: Restart postfix
+  ansible.builtin.command: /bin/true
   notify:
     - remove pid
     - restart service
 
-- name: remove pid
-  file:
+- name: Remove PID
+  ansible.builtin.file:
     path: "~postfix/pid/master.pid"
     state: absent
   when: is_docker_guest
 
-- name: restart service
-  service:
+- name: Restart service
+  ansible.builtin.service:
     name: postfix
     state: restarted
   when: service_default_state | default('started') == 'started'
 
-- name: new aliases
-  command: newaliases
+- name: New aliases
+  ansible.builtin.command: newaliases
 
-- name: new virtual aliases
-  command: postmap /etc/postfix/virtual
+- name: New virtual aliases
+  ansible.builtin.command: postmap /etc/postfix/virtual
 
-- name: postmap sasl_passwd
-  command: postmap hash:/etc/postfix/sasl_passwd
+- name: Postmap sasl_passwd
+  ansible.builtin.command: postmap hash:/etc/postfix/sasl_passwd
 
-- name: postmap sender_canonical_maps
-  command: postmap hash:/etc/postfix/sender_canonical_maps
+- name: Postmap sender_canonical_maps
+  ansible.builtin.command: postmap hash:/etc/postfix/sender_canonical_maps
 
-- name: postmap generic
-  command: postmap hash:/etc/postfix/generic
+- name: Postmap generic
+  ansible.builtin.command: postmap hash:/etc/postfix/generic
 
-- name: postmap transport
-  command: postmap /etc/postfix/transport
+- name: Postmap transport
+  ansible.builtin.command: postmap /etc/postfix/transport

@@ -1,26 +1,33 @@
 # defaults file for postfix
 ---
+postfix_conf_dir: /etc/postfix
+postfix_user: root
+postfix_group: root
 postfix_install:
   - postfix
   - mailutils
   - libsasl2-2
   - sasl2-bin
   - libsasl2-modules
+
+
+postfix_smtpd_banner: '$myhostname ESMTP $mail_name (Ubuntu)'
 postfix_hostname: "{{ ansible_fqdn }}"
 postfix_mailname: "{{ ansible_fqdn }}"
+postfix_relayhost: ""
+postfix_relaytls: false
+postfix_sasl_auth_enable: false
+postfix_sasl_user: ""
+postfix_sasl_password: ""
+postfix_sasl_security_options: ""
+postfix_inet_interfaces: all
+postfix_inet_protocols: all
+
 postfix_aliases: []
 postfix_virtual_aliases: []
 postfix_sender_canonical_maps: []
 postfix_generic: []
-postfix_relayhost: ""
-postfix_relayhost_port: ""
-postfix_relaytls: false
-postfix_sasl_auth_enable: ""
-postfix_sasl_user: "postmaster@{{ ansible_domain }}"
-postfix_sasl_password: 'k8+haga4@#pR'
-postfix_sasl_security_options: ""
-postfix_inet_interfaces: all
-postfix_inet_protocols: all
+
 postfix_mydestination:
   - "{{ postfix_hostname }}"
   - localdomain
@@ -30,6 +37,18 @@ postfix_mynetworks:
   - 127.0.0.0/8
   - '[::ffff:127.0.0.0]/104'
   - '[::1]/128'
-postfix_smtpd_banner: '$myhostname ESMTP $mail_name (Ubuntu)'
+
 postfix_disable_vrfy_command: false
 postfix_message_size_limit: 10240000
+
+postfix_standard_templates:
+  - src: mailname.j2
+    dest: "/etc/mailname"
+    mode: "0644"
+  - src: main.cf.j2
+    dest: "{{ postfix_conf_dir }}/main.cf"
+    mode: "0644"
+  - src: transport.j2
+    dest: "{{ postfix_conf_dir }}/transport"
+    mode: "0644"
+    postmap: transport
