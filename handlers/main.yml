@@ -3,8 +3,8 @@
 - name: Restart postfix
   ansible.builtin.command: /bin/true
   notify:
-    - remove pid
-    - restart service
+    - Remove PID
+    - Restart service
 
 - name: Remove PID
   ansible.builtin.file:
