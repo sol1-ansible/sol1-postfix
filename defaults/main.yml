@@ -47,7 +47,3 @@ postfix_standard_templates:
   - src: main.cf.j2
     dest: "{{ postfix_conf_dir }}/main.cf"
     mode: "0644"
-  - src: transport.j2
-    dest: "{{ postfix_conf_dir }}/transport"
-    mode: "0644"
-    postmap: transport

@@ -28,7 +28,17 @@
     mode: "{{ item.mode }}"
   loop: "{{ postfix_standard_templates }}"
   notify:
-    - Postmap {{ item.postmap | default('') }}"
+    - Restart postfix
+
+- name: Configure transport maps
+  ansible.builtin.template:
+    src: transport.j2
+    dest: "{{ postfix_conf_dir }}/transport"
+    owner: "{{ postfix_user }}"
+    group: "{{ postfix_group }}"
+    mode: "0644"
+  notify:
+    - Postmap transport
     - Restart postfix
 
 - name: Configure sasl username/password when defined
