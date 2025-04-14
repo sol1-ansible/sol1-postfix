@@ -49,7 +49,7 @@
     group: "{{ postfix_group }}"
     mode: 0600
   when: postfix_sasl_auth_enabled | bool
-  no_log: true
+  #no_log: true
   notify:
     - Postmap sasl_passwd
     - Restart postfix
