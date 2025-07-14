@@ -48,8 +48,10 @@
     owner: "{{ postfix_user }}"
     group: "{{ postfix_group }}"
     mode: 0600
-  when: postfix_sasl_auth_enabled | bool
-  #no_log: true
+  when: 
+    - postfix_sasl_auth_enabled is defined
+    - postfix_sasl_auth_enabled | bool
+  no_log: true
   notify:
     - Postmap sasl_passwd
     - Restart postfix
