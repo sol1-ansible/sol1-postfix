@@ -95,9 +95,6 @@ smtp_tls_note_starttls_offer = yes
 smtp_tls_CAfile = {{ postfix_smtp_tls_cafile }}
 {% endif %}
 {% endif %}
-{% else %}
-relayhost = {{ postfix_relayhost }}
-{% endif %}
 
 message_size_limit = {{  postfix_message_size_limit }}
 
