@@ -58,7 +58,7 @@
 
 - name: Configure aliases
   ansible.builtin.lineinfile:
-    dest: "{{ postfix_conf_dir }}/virtual"
+    dest: "{{ postfix_conf_dir }}/aliases"
     regexp: '^{{ item.user }}:.*'
     line: '{{ item.user }}: {{ item.alias }}'
     owner: "{{ postfix_user }}"

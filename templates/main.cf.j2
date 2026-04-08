@@ -36,8 +36,10 @@ myorigin = {{ postfix_origin }}
 {% if postfix_masquerade_domains is defined %}
 masquerade_domains = {{ postfix_masquerade_domains }}
 {% endif %}
+{% if postfix_aliases is defined and postfix_aliases | length > 0 %}
 alias_maps = hash:/etc/postfix/aliases
 alias_database = hash:/etc/postfix/aliases
+{% endif %}
 {% if postfix_virtual_aliases %}
 virtual_alias_maps = hash:/etc/postfix/virtual
 {% endif %}
