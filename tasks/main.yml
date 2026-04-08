@@ -62,7 +62,9 @@
     owner: "{{ postfix_user }}"
     group: "{{ postfix_group }}"
     mode: 0644
-    state: present
+    state: touch
+    modification_time: preserve
+    access_time: preserve
   when: postfix_aliases is not defined or postfix_aliases | length == 0
   notify:
     - New aliases
