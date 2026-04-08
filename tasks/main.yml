@@ -56,7 +56,19 @@
     - Postmap sasl_passwd
     - Restart postfix
 
-- name: Configure aliases
+- name: Create empty aliases file if we don't have aliases (because the config has an alias map entry)
+  ansible.builtin.file:
+    dest: "{{ postfix_conf_dir }}/aliases"
+    owner: "{{ postfix_user }}"
+    group: "{{ postfix_group }}"
+    mode: 0644
+    state: present
+  when: postfix_aliases is not defined or postfix_aliases | length == 0
+  notify:
+    - New aliases
+    - Restart postfix
+
+- name: Add aliases (if we have any)
   ansible.builtin.lineinfile:
     dest: "{{ postfix_conf_dir }}/aliases"
     regexp: '^{{ item.user }}:.*'

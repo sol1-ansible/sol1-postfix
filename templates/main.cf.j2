@@ -36,18 +36,16 @@ myorigin = {{ postfix_origin }}
 {% if postfix_masquerade_domains is defined %}
 masquerade_domains = {{ postfix_masquerade_domains }}
 {% endif %}
-{% if postfix_aliases is defined and postfix_aliases | length > 0 %}
-alias_maps = hash:/etc/postfix/aliases
-alias_database = hash:/etc/postfix/aliases
-{% endif %}
+alias_maps = hash:{{ postfix_conf_dir }}/aliases
+alias_database = hash:{{ postfix_conf_dir }}/aliases
 {% if postfix_virtual_aliases %}
-virtual_alias_maps = hash:/etc/postfix/virtual
+virtual_alias_maps = hash:{{ postfix_conf_dir }}/virtual
 {% endif %}
 {% if postfix_sender_canonical_maps %}
-sender_canonical_maps = hash:/etc/postfix/sender_canonical_maps
+sender_canonical_maps = hash:{{ postfix_conf_dir }}/sender_canonical_maps
 {% endif %}
 {% if postfix_generic %}
-smtp_generic_maps = hash:/etc/postfix/generic
+smtp_generic_maps = hash:{{ postfix_conf_dir }}/generic
 {% endif %}
 mydestination = {{ postfix_mydestination }}
 mynetworks = {{ postfix_mynetworks |join(' ') }}
@@ -57,7 +55,7 @@ inet_interfaces = {{ postfix_inet_interfaces }}
 inet_protocols = {{ postfix_inet_protocols }}
 
 {% if postfix_transports is defined %}
-transport_maps = hash:/etc/postfix/transport
+transport_maps = hash:{{ postfix_conf_dir }}/transport
 {% endif %}
 
 {% if postfix_relaydomains is defined %}
@@ -86,7 +84,7 @@ relayhost = {{ postfix_relayhost }}
 {% endif %}
 {% if postfix_sasl_auth_enable %}
 smtp_sasl_auth_enable = {{ postfix_sasl_auth_enable | bool | ternary('yes', 'no') }}
-smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_password_maps = hash:{{ postfix_conf_dir }}/sasl_passwd
 smtp_sasl_security_options = {{ postfix_sasl_security_options }}
 {% endif %}
 {% if postfix_smtpd_tls_security_level is defined %}

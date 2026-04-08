@@ -19,19 +19,19 @@
   when: service_default_state | default('started') == 'started'
 
 - name: New aliases
-  ansible.builtin.command: newaliases
+  ansible.builtin.command: postalias {{ postfix_conf_dir }}/aliases
 
 - name: New virtual aliases
-  ansible.builtin.command: postmap /etc/postfix/virtual
+  ansible.builtin.command: postmap {{ postfix_conf_dir }}/virtual
 
 - name: Postmap sasl_passwd
-  ansible.builtin.command: postmap hash:/etc/postfix/sasl_passwd
+  ansible.builtin.command: postmap hash:{{ postfix_conf_dir }}/sasl_passwd
 
 - name: Postmap sender_canonical_maps
-  ansible.builtin.command: postmap hash:/etc/postfix/sender_canonical_maps
+  ansible.builtin.command: postmap hash:{{ postfix_conf_dir }}/sender_canonical_maps
 
 - name: Postmap generic
-  ansible.builtin.command: postmap hash:/etc/postfix/generic
+  ansible.builtin.command: postmap hash:{{ postfix_conf_dir }}/generic
 
 - name: Postmap transport
-  ansible.builtin.command: postmap /etc/postfix/transport
+  ansible.builtin.command: postmap hash:{{ postfix_conf_dir }}/transport
