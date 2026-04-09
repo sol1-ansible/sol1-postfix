@@ -48,13 +48,22 @@
     owner: "{{ postfix_user }}"
     group: "{{ postfix_group }}"
     mode: 0600
-  when: 
+  when:
     - postfix_sasl_auth_enabled is defined
     - postfix_sasl_auth_enabled | bool
   no_log: true
   notify:
     - Postmap sasl_passwd
     - Restart postfix
+
+- name: Ensure sasl_passwd.db exists
+  ansible.builtin.command:
+    cmd: postmap hash:{{ postfix_conf_dir }}/sasl_passwd
+    creates: "{{ postfix_conf_dir }}/sasl_passwd.db"
+  when:
+    - postfix_sasl_auth_enabled is defined
+    - postfix_sasl_auth_enabled | bool
+  no_log: true
 
 - name: Create empty aliases file if we don't have aliases (because the config has an alias map entry)
   ansible.builtin.file:
