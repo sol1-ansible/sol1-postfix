@@ -5,7 +5,7 @@
 # Debian specific:  Specifying a file name will cause the first
 # line of that file to be used as the name.  The Debian default
 # is /etc/mailname.
-myorigin = /etc/mailname
+myorigin = {{ postfix_origin | default('/etc/mailname') }}
 
 smtpd_banner = {{ postfix_smtpd_banner }}
 biff = no
@@ -22,7 +22,6 @@ readme_directory = no
 # TLS parameters
 smtpd_tls_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
 smtpd_tls_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
-smtpd_use_tls=yes
 smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
@@ -30,9 +29,6 @@ smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_una
 
 myhostname = {{ postfix_hostname }}
 mydomain = {{ postfix_hostname }}
-{% if postfix_origin is defined %}
-myorigin = {{ postfix_origin }}
-{% endif %}
 {% if postfix_masquerade_domains is defined %}
 masquerade_domains = {{ postfix_masquerade_domains }}
 {% endif %}
@@ -82,8 +78,8 @@ relayhost = {{ postfix_relayhost }}:{{ postfix_relayhost_port }}
 {% elif postfix_relayhost %}
 relayhost = {{ postfix_relayhost }}
 {% endif %}
-{% if postfix_sasl_auth_enable %}
-smtp_sasl_auth_enable = {{ postfix_sasl_auth_enable | bool | ternary('yes', 'no') }}
+{% if postfix_sasl_auth_enabled | default(false) | bool %}
+smtp_sasl_auth_enable = {{ postfix_sasl_auth_enabled | bool | ternary('yes', 'no') }}
 smtp_sasl_password_maps = hash:{{ postfix_conf_dir }}/sasl_passwd
 smtp_sasl_security_options = {{ postfix_sasl_security_options }}
 {% endif %}
@@ -91,7 +87,6 @@ smtp_sasl_security_options = {{ postfix_sasl_security_options }}
 smtpd_tls_security_level = {{ postfix_smtpd_tls_security_level }}
 {% endif %}
 {% if postfix_relaytls %}
-smtp_use_tls = yes
 smtp_tls_security_level = encrypt
 smtp_tls_note_starttls_offer = yes
 {% if postfix_smtp_tls_cafile is defined %}
